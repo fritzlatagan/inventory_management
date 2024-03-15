@@ -44,21 +44,23 @@ def read():
     try:
         cursor.connection.ping()
         sql = """
-    SELECT
-        si.serial_number,
-        si.property_id,
-        si.room_id,
-        si.item_specification,
-        a.acquisition_date, 
-        si.custodian_id,
-        si.description_id
-    FROM
-        Serialized_Items AS si
-    LEFT JOIN Acquisition_Details AS ad ON ad.property_id = si.property_id
-    LEFT JOIN Acquisition AS a ON a.acquisition_id = ad.acquisition_id
-    ORDER BY
-        si.serial_number DESC
-"""
+SELECT
+    si.serial_number,
+    si.property_id,
+    si.room_id,
+    si.item_specification,
+    a.acquisition_date, 
+    pc.custodian_id,
+    des.description_id
+FROM
+    Serialized_Items AS si
+LEFT JOIN Acquisition_Details AS ad ON ad.property_id = si.property_id
+LEFT JOIN Acquisition AS a ON a.acquisition_id = ad.acquisition_id
+LEFT JOIN Property_Custodian AS pc ON a.custodian_id = pc.custodian_id  
+LEFT JOIN Description AS des ON si.description_id = des.description_id
+ORDER BY
+    si.serial_number DESC
+  """
 
         cursor.execute(sql)
         results = cursor.fetchall()
