@@ -260,3 +260,29 @@ CREATE TABLE Company (
 ```
 
 Commands for creating foreign keys:
+```
+ALTER TABLE Serialized_Items
+    ADD FOREIGN KEY (room_id) REFERENCES ICT_Room(room_id);
+
+ALTER TABLE Acquisition
+    ADD FOREIGN KEY (company_id) REFERENCES Company(company_id),
+    ADD FOREIGN KEY (custodian_id) REFERENCES Property_Custodian(custodian_id);
+
+ALTER TABLE Acquisition_Details
+    ADD FOREIGN KEY (acquisition_id) REFERENCES Acquisition(acquisition_id);
+
+ALTER TABLE ICT_Room
+    ADD FOREIGN KEY (custodian_id) REFERENCES Property_Custodian(custodian_id);
+
+ALTER TABLE Class
+    ADD FOREIGN KEY (teacher_id) REFERENCES Teacher(teacher_id);
+
+ALTER TABLE Monitoring
+    ADD FOREIGN KEY (attendance_id) REFERENCES Student_Attendance(attendance_id),
+    ADD FOREIGN KEY (serial_number) REFERENCES Serialized_Items(serial_number),
+    ADD FOREIGN KEY (description_id) REFERENCES Description(description_id);
+
+ALTER TABLE Student_Attendance
+    ADD FOREIGN KEY (student_id) REFERENCES Student(student_id);
+
+```
