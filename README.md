@@ -20,6 +20,7 @@ Current Problem at Hand: Cannot connect to the database
 
 # Tables
 
+<pre>
 You may also refer to the Crow's Foot ERD.png
 
 Table: Serialized_Items
@@ -30,7 +31,7 @@ PK property_id *INT 3*
 
 FK room_id *INT 3*
 
-item_specification *VARCHAR 50* <br>
+item_specification *VARCHAR 50* 
 
 Table: Item_Type
 
@@ -135,6 +136,8 @@ company_name *VARCHAR 50*
 company_address *VARCHAR 50*
 
 company_contact_number *VARCHAR 15*
+
+</pre>
 
 # CLI Command
 
