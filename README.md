@@ -20,7 +20,7 @@ Current Problem at Hand: Cannot connect to the database
 
 # Tables
 
-You may also refer to the 
+You may also refer to the Crow's Foot ERD.png
 
 Table: Serialized_Items
 
@@ -30,7 +30,7 @@ PK property_id *INT 3*
 
 FK room_id *INT 3*
 
-item_specification *VARCHAR 50*
+item_specification *VARCHAR 50* <br>
 
 Table: Item_Type
 
