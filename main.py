@@ -26,6 +26,7 @@ alpha='ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 def connection():
     conn = pymysql.connect(
         host='localhost',
+        port=3306,
         user='root',
         password='',
         db='inventory_management'
@@ -44,23 +45,24 @@ def read():
     try:
         cursor.connection.ping()
         sql = """
-SELECT
-    si.serial_number,
-    si.property_id,
-    si.room_id,
-    si.item_specification,
-    a.acquisition_date, 
-    pc.custodian_id,
-    des.description_id
-FROM
-    Serialized_Items AS si
-LEFT JOIN Acquisition_Details AS ad ON ad.property_id = si.property_id
-LEFT JOIN Acquisition AS a ON a.acquisition_id = ad.acquisition_id
-LEFT JOIN Property_Custodian AS pc ON a.custodian_id = pc.custodian_id  
-LEFT JOIN Description AS des ON si.description_id = des.description_id
-ORDER BY
-    si.serial_number DESC
-  """
+            SELECT
+                si.serial_number,
+                si.property_id,
+                ict.room_name AS room_id,
+                si.item_specification,
+                a.acquisition_date, 
+                pc.custodian_id,
+                des.description_id  -- Use description_id from Description
+            FROM
+                Serialized_Items AS si
+            LEFT JOIN Acquisition_Details AS ad ON ad.property_id = si.property_id
+            LEFT JOIN Acquisition AS a ON a.acquisition_id = ad.acquisition_id
+            LEFT JOIN Property_Custodian AS pc ON a.custodian_id = pc.custodian_id  
+            LEFT JOIN ICT_Room AS ict ON ict.room_id = si.room_id
+            LEFT JOIN Description AS des ON des.description_id = si.description_id  -- Join directly with Description
+            ORDER BY
+                si.serial_number DESC
+            """
 
         cursor.execute(sql)
         results = cursor.fetchall()
@@ -73,6 +75,8 @@ ORDER BY
         conn.close()
 
 
+
+
 # Refreshes the table everytime an action is performed
 def refreshTable():
     for data in data_table.get_children():
@@ -81,6 +85,7 @@ def refreshTable():
         data_table.insert(parent='', index='end', iid=array, text="", values=(array), tag="bg_color")
     data_table.tag_configure('bg_color', background="#7CB1E5")
     data_table.pack()
+
 
 # Gives values to placeholderarray
 def setph(word, num):
