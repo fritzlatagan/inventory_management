@@ -57,8 +57,8 @@ You may also refer to the Crow's Foot ERD.png
 
 | Column          | Data Type      | Constraints |
 |-----------------|----------------|-------------|
-| property_id     | INT(3)         | PK, FK      |
-| item_type_id    | INT(3)         | PK, FK      |
+| property_id     | INT(3)         | PK          |
+| item_type_id    | INT(3)         | PK          |
 | acquisition_id  | INT(3)         | FK          |
 
 ---
