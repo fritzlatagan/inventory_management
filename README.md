@@ -20,130 +20,149 @@ Current Problem at Hand: Cannot connect to the database
 
 # Tables
 
-<pre>
 You may also refer to the Crow's Foot ERD.png
 
-Table: Serialized_Items
+### Table: Serialized_Items
 
-PK serial_number *VARCHAR 16*
+| Column          | Data Type      | Constraints |
+|-----------------|----------------|-------------|
+| serial_number   | VARCHAR(16)    | PK          |
+| property_id     | INT(3)         | PK          |
+| room_id         | INT(3)         | FK          |
+| item_specification | VARCHAR(50) |             |
 
-PK property_id *INT 3*
+---
 
-FK room_id *INT 3*
+### Table: Item_Type
 
-item_specification *VARCHAR 50* 
+| Column          | Data Type      | Constraints |
+|-----------------|----------------|-------------|
+| item_type_id    | INT(3)         | PK          |
+| item_type_name  | VARCHAR(50)    | PK          |
 
-Table: Item_Type
+---
 
-PK item_type_id *INT 3*
+### Table: Acquisition
 
-PK item_type_name *VARCHAR 50*
+| Column          | Data Type      | Constraints |
+|-----------------|----------------|-------------|
+| acquisition_id  | INT(3)         | PK          |
+| company_id      | INT(3)         | FK          |
+| custodian_id    | INT(7)         | FK          |
+| acquisition_date| DATE           |             |
 
-Table: Acquisition
+---
 
-PK acquisition_id *INT 3*
+### Table: Acquisition Details
 
-FK company_id *INT 3*
+| Column          | Data Type      | Constraints |
+|-----------------|----------------|-------------|
+| property_id     | INT(3)         | PK, FK      |
+| item_type_id    | INT(3)         | PK, FK      |
+| acquisition_id  | INT(3)         | FK          |
 
-FK custodian_id *INT 7*
+---
 
-acquisition_date *DATE*
+### Table: ICT Room
 
-Table: Acquisition Details
+| Column          | Data Type      | Constraints |
+|-----------------|----------------|-------------|
+| room_id         | INT(3)         | PK          |
+| custodian_id    | INT(7)         | FK          |
+| room_name       | VARCHAR(50)    |             |
 
-PK property_id *INT 3*
+---
 
-PK item_type_id *INT 3*
+### Table: Property_Custodian
 
-FK acquisition_id *INT 3*
+| Column                 | Data Type   | Constraints |
+|------------------------|-------------|-------------|
+| custodian_id           | INT(7)      | PK          |
+| name                   | VARCHAR(50) |             |
+| gender                 | VARCHAR(20) |             |
+| contact_information    | VARCHAR(15) |             |
+| start_date             | DATE        |             |
 
-Table: ICT Room
+---
 
-PK room_id *INT 3*
+### Table: Class
 
-FK custodian_id *INT 7*
+| Column          | Data Type      | Constraints |
+|-----------------|----------------|-------------|
+| class_id        | INT(3)         | PK          |
+| teacher_id      | INT(7)         | FK          |
+| class_name      | VARCHAR(50)    |             |
 
-room_name *VARCHAR 50*
+---
 
-Table: Property_Custodian
+### Table: Monitoring
 
-PK custodian_id *INT 7*
+| Column          | Data Type      | Constraints |
+|-----------------|----------------|-------------|
+| attendance_id   | INT(3)         | FK          |
+| serial_number   | VARCHAR(16)    | FK          |
+| description_id  | INT(3)         | FK          |
 
-name *VARCHAR 50*
+---
 
-gender *VARCHAR 20*
+### Table: Teacher
 
-contact_information *VARCHAR 15*
+| Column                    | Data Type   | Constraints |
+|---------------------------|-------------|-------------|
+| teacher_id                | INT(7)      | PK          |
+| teacher_name              | VARCHAR(50) | PK          |
+| teacher_gender            | VARCHAR(20) |             |
+| teacher_contact_information | VARCHAR(15) |             |
 
-start_date *DATE*
+---
 
-Table: Class
+### Table: Description
 
-PK class_id *INT 3*
+| Column            | Data Type   | Constraints |
+|-------------------|-------------|-------------|
+| description_id    | INT(3)     | PK          |
+| description_name  | VARCHAR(50)|             |
 
-FK teacher_id *INT 7*
+---
 
-class_name *VARCHAR 50*
+### Table: Student
 
-Table: Monitoring
+| Column                  | Data Type   | Constraints |
+|-------------------------|-------------|-------------|
+| student_id              | INT(12)     | PK          |
+| student_name            | VARCHAR(50)| PK          |
+| student_gender          | VARCHAR(20)|             |
+| student_contact_information | VARCHAR(15)|         |
+| student_year_level      | INT(2)     |             |
 
-FK attendance_id *INT 3*
+---
 
-FK serial_number *VARCHAR 16*
+### Table: Student_Attendance
 
-FK description_id *INT 3*
+| Column          | Data Type      | Constraints |
+|-----------------|----------------|-------------|
+| attendance_id   | INT(3)         | PK          |
+| student_id      | INT(12)        | FK          |
 
-Table: Teacher
+---
 
-PK teacher_id *INT 7*
+### Table: Company
 
-PK teacher_name *VARCHAR 50*
+| Column                   | Data Type   | Constraints |
+|--------------------------|-------------|-------------|
+| company_id               | INT(8)      | PK          |
+| company_name             | VARCHAR(50) |             |
+| company_address          | VARCHAR(50) |             |
+| company_contact_number   | VARCHAR(15) |             |
 
-teacher_gender *VARCHAR 20*
-
-teacher_contact_information *VARCHAR 15*
-
-Table: Description
-
-PK description_id *INT 3*
-
-description_name *VARCHAR 50*
-
-Table: Student
-
-PK student_id *INT 12*
-
-PK student_name *VARCHAR 50*
-
-student_gender *VARCHAR 20*
-
-student_contact_information *VARCHAR 15*
-
-student_year_level *INT 2*
-
-Table: Student_Attendance
-
-PK attendance_id *INT 3*
-
-FK student_id *INT 12*
-
-Table: Company
-
-PK company_id *INT 8*
-
-company_name *VARCHAR 50*
-
-company_address *VARCHAR 50*
-
-company_contact_number *VARCHAR 15*
-
-</pre>
-
-# CLI Command
+# CLI Command to Create the Tables
 
 Commands for creating tables:
 
 ```
+CREATE DATABASE inventory_management;
+USE DATABASE inventory_management;
+
 CREATE TABLE Serialized_Items (
     serial_number VARCHAR(16),
     property_id INT(3),
