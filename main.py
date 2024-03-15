@@ -33,52 +33,45 @@ def connection():
     print(f"Connected to MySQL server: {conn}")
     return conn
 
+conn = connection()
+cursor = conn.cursor()
 
-conn=connection()
-cursor=conn.cursor()
+for i in range(0, 5):
+    placeholderArray[i] = tkinter.StringVar()
 
-for i in range(0,5):
-    placeholderArray[i]=tkinter.StringVar()
-
-#Reads the database items
+# Reads the database items
 def read():
     try:
         cursor.connection.ping()
         sql = """
-            SELECT
-                si.serial_number,
-                si.property_id,
-                si.room_id,
-                si.item_specification,
-                a.acquisition_date,  # Acquisition date from acquisition table
-                pc.custodian_id,
-                d.description_id
-            FROM
-                Serialized_Items AS si
-            LEFT JOIN Property_Custodian AS pc ON pc.custodian_id = si.custodian_id
-            LEFT JOIN Description AS d ON si.description_id = d.description_id
-            LEFT JOIN Acquisition AS a ON a.item_id = si.item_id  # Join on item_id (replace with your actual linking field)
-            ORDER BY
-                si.serial_number DESC
+    SELECT
+        si.serial_number,
+        si.property_id,
+        si.room_id,
+        si.item_specification,
+        a.acquisition_date, 
+        si.custodian_id,
+        si.description_id
+    FROM
+        Serialized_Items AS si
+    LEFT JOIN Acquisition_Details AS ad ON ad.property_id = si.property_id
+    LEFT JOIN Acquisition AS a ON a.acquisition_id = ad.acquisition_id
+    ORDER BY
+        si.serial_number DESC
+"""
 
-        """
         cursor.execute(sql)
         results = cursor.fetchall()
-        data_table.delete(*data_table.get_children())  # Clear existing data from table
-        for array in results:
-            data_table.insert(parent='', index='end', iid=array, text="", values=(array), tag="bg_color")
-        conn.commit()
+        return results  # Return the fetched results
     except (pymysql.err.OperationalError, ConnectionError) as err:
         print("Error connecting to database:", err)
         messagebox.showerror("Error", "Failed to connect to database. Please check your connection details.")
+        return []  # Return an empty list if an error occurs
     finally:
         conn.close()
-    data_table.tag_configure('bg_color', background="#7CB1E5")
-    data_table.pack()
 
 
-
-#Refreshes the table everytime an action is performed
+# Refreshes the table everytime an action is performed
 def refreshTable():
     for data in data_table.get_children():
         data_table.delete(data)
@@ -87,25 +80,22 @@ def refreshTable():
     data_table.tag_configure('bg_color', background="#7CB1E5")
     data_table.pack()
 
-
-#Gives values to placeholderarray
-def setph(word,num):
-    for ph in range(0,5):
+# Gives values to placeholderarray
+def setph(word, num):
+    for ph in range(0, 5):
         if ph == num:
             placeholderArray[ph].set(word)
 
-
-
-
 #Adds/Saves items in entry to the database
 def save():
-    serial_number = str(serialNumberEntry.get())
-    property_id = str(propertyIdEntry.get())
-    room_id = str(roomIdEntry.get())
-    item_specification = str(itemSpecificationEntry.get())
-    acquisition_date = str(acquisitionDateEntry.get())
-    custodian_id = str(custodianIdEntry.get())
-    description_id = str(descriptionIdEntry.get())
+    # Get values from user input
+    serial_number = serialNumberEntry.get()
+    property_id = propertyIdEntry.get()
+    room_id = roomIdEntry.get()
+    item_specification = itemSpecificationEntry.get()
+    acquisition_date = acquisitionDateEntry.get()
+    custodian_id = custodianIdEntry.get()
+    description_id = descriptionIdEntry.get()
     
     # Regular expressions for validation
     alphanumeric_regex = re.compile(r'^[a-zA-Z0-9]+$')
@@ -137,7 +127,6 @@ def save():
         sql = f"INSERT INTO Serialized_Items (serial_number, property_id, room_id, item_specification, acquisition_date, custodian_id, description_id) VALUES ('{serial_number}', '{property_id}', '{room_id}', '{item_specification}', '{acquisition_date}', '{custodian_id}', '{description_id}')"
         cursor.execute(sql)
         conn.commit()
-        conn.close()
         refreshTable()
         messagebox.showinfo("", "Data saved successfully")
     except Exception as e:
