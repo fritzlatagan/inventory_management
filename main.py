@@ -267,8 +267,15 @@ def find():
 
 # Clears the entry form
 def clear():
-    for num in range(0, 7):  # Update the range to cover all entries including custodian and description ID
-        setph('', num)
+    serialNumberEntry.delete(0, 'end')
+    propertyIdEntry.delete(0, 'end')
+    roomIdEntry.delete(0, 'end')
+    itemSpecificationEntry.delete(0, 'end')
+    acquisitionDateEntry.delete(0, 'end')
+    custodianIdEntry.delete(0, 'end')
+    descriptionIdEntry.delete(0, 'end')
+
+
 
 # Exports the database to an excel file
 def exportExcel():
