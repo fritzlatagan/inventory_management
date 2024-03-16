@@ -45,25 +45,26 @@ def read():
     try:
         cursor.connection.ping()
         sql = """
-            SELECT
-                si.serial_number,
-                si.property_id,
-                ict.room_name AS room_id,
-                si.item_specification,
-                a.acquisition_date, 
-                pc.custodian_id,
-                des.description_id  -- Use description_id from Description
-            FROM
-                Serialized_Items AS si
-            LEFT JOIN Acquisition_Details AS ad ON ad.property_id = si.property_id
-            LEFT JOIN Acquisition AS a ON a.acquisition_id = ad.acquisition_id
-            LEFT JOIN Property_Custodian AS pc ON a.custodian_id = pc.custodian_id  
-            LEFT JOIN ICT_Room AS ict ON ict.room_id = si.room_id
-            LEFT JOIN Description AS des ON des.description_id = si.description_id  -- Join directly with Description
-            ORDER BY
-                si.serial_number DESC
-            """
-
+        SELECT
+          inv.input_id,
+          si.serial_number,
+          ad.property_id,
+          ict.room_id,
+          si.item_specification,
+          si.acquisition_date, 
+          pc.custodian_id,
+          des.description_id
+        FROM
+          Inventory AS inv
+          LEFT JOIN Serialized_Items AS si ON inv.serial_number = si.serial_number
+          LEFT JOIN Acquisition_Details AS ad ON si.property_id = ad.property_id
+          LEFT JOIN ict_room AS ict ON si.room_id = ict.room_id
+          LEFT JOIN Property_Custodian AS pc ON inv.custodian_id = pc.custodian_id
+          LEFT JOIN Description AS des ON inv.description_id = des.description_id
+        ORDER BY
+          si.serial_number DESC
+        """
+    
         cursor.execute(sql)
         results = cursor.fetchall()
         return results  # Return the fetched results
@@ -76,16 +77,14 @@ def read():
 
 
 
-
 # Refreshes the table everytime an action is performed
 def refreshTable():
-    for data in data_table.get_children():
-        data_table.delete(data)
-    for array in read():
-        data_table.insert(parent='', index='end', iid=array, text="", values=(array), tag="bg_color")
+    data_table.delete(*data_table.get_children())  # Clear existing data
+    results = read()  # Fetch new data
+    for array in results:
+        data_table.insert(parent='', index='end', iid=array[0], values=array[1:], tag="bg_color")  # Insert new data
     data_table.tag_configure('bg_color', background="#7CB1E5")
     data_table.pack()
-
 
 # Gives values to placeholderarray
 def setph(word, num):
@@ -94,6 +93,7 @@ def setph(word, num):
             placeholderArray[ph].set(word)
 
 #Adds/Saves items in entry to the database
+
 def save():
     # Get values from user input
     serial_number = serialNumberEntry.get()
@@ -103,13 +103,16 @@ def save():
     acquisition_date = acquisitionDateEntry.get()
     custodian_id = custodianIdEntry.get()
     description_id = descriptionIdEntry.get()
-    
+
     # Regular expressions for validation
     alphanumeric_regex = re.compile(r'^[a-zA-Z0-9]+$')
     numeric_regex = re.compile(r'^[0-9]+$')
-    
+
     # Input validation
-    if not (serial_number and serial_number.strip()) or not (property_id and property_id.strip()) or not (room_id and room_id.strip()) or not (item_specification and item_specification.strip()) or not (acquisition_date and acquisition_date.strip()) or not (custodian_id and custodian_id.strip()) or not (description_id and description_id.strip()):
+    if not (serial_number and serial_number.strip()) or not (property_id and property_id.strip()) or not (
+            room_id and room_id.strip()) or not (item_specification and item_specification.strip()) or not (
+            acquisition_date and acquisition_date.strip()) or not (custodian_id and custodian_id.strip()) or not (
+            description_id and description_id.strip()):
         messagebox.showwarning("", "Please fill up all entries")
         return
 
@@ -131,7 +134,8 @@ def save():
 
     try:
         cursor.connection.ping()
-        sql = f"INSERT INTO Serialized_Items (serial_number, property_id, room_id, item_specification, acquisition_date, custodian_id, description_id) VALUES ('{serial_number}', '{property_id}', '{room_id}', '{item_specification}', '{acquisition_date}', '{custodian_id}', '{description_id}')"
+        # Insert into Inventory table directly without checking if serial number already exists
+        sql = f"INSERT INTO Inventory (serial_number, property_id, room_id, item_specification, acquisition_date, custodian_id, description_id) VALUES ('{serial_number}', '{property_id}', '{room_id}', '{item_specification}', '{acquisition_date}', '{custodian_id}', '{description_id}')"
         cursor.execute(sql)
         conn.commit()
         refreshTable()
@@ -139,9 +143,6 @@ def save():
     except Exception as e:
         print(e)
         messagebox.showwarning("", f"Error while saving: {str(e)}")
-
-    
-
 
 # Updates the selected item with input validation
 def update():
@@ -167,7 +168,10 @@ def update():
     numeric_regex = re.compile(r'^[0-9]+$')
 
     # Input validation
-    if not (serial_number and serial_number.strip()) or not (property_id and property_id.strip()) or not (room_id and room_id.strip()) or not (item_specification and item_specification.strip()) or not (acquisition_date and acquisition_date.strip()) or not (custodian_id and custodian_id.strip()) or not (description_id and description_id.strip()):
+    if not (serial_number and serial_number.strip()) or not (property_id and property_id.strip()) or not (
+            room_id and room_id.strip()) or not (item_specification and item_specification.strip()) or not (
+            acquisition_date and acquisition_date.strip()) or not (custodian_id and custodian_id.strip()) or not (
+            description_id and description_id.strip()):
         messagebox.showwarning("", "Please fill up all entries")
         return
 
@@ -189,7 +193,7 @@ def update():
 
     try:
         cursor.connection.ping()
-        sql = f"UPDATE Serialized_Items SET property_id = '{property_id}', room_id = '{room_id}', item_specification = '{item_specification}', acquisition_date = '{acquisition_date}', custodian_id = '{custodian_id}', description_id = '{description_id}' WHERE serial_number = '{selectedItemId}'"
+        sql = f"UPDATE Inventory SET property_id = '{property_id}', room_id = '{room_id}', item_specification = '{item_specification}', acquisition_date = '{acquisition_date}', custodian_id = '{custodian_id}', description_id = '{description_id}' WHERE serial_number = '{selectedItemId}'"
         cursor.execute(sql)
         conn.commit()
         conn.close()
@@ -217,25 +221,22 @@ def delete():
         messagebox.showwarning("", "Please select a data row")
 
 # Used to select an item
+# Used to select an item
 def select():
     try:
         selectedItem = data_table.selection()[0]
-        itemId = str(data_table.item(selectedItem)['values'][0])
-        property_id = str(data_table.item(selectedItem)['values'][1])
-        room_id = str(data_table.item(selectedItem)['values'][2])
-        item_specification = str(data_table.item(selectedItem)['values'][3])
-        acquisition_date = str(data_table.item(selectedItem)['values'][4])
-        custodian_id = str(data_table.item(selectedItem)['values'][5])
-        description_id = str(data_table.item(selectedItem)['values'][6])
-        setph(itemId, 0)
-        setph(property_id, 1)
-        setph(room_id, 2)
-        setph(item_specification, 3)
-        setph(acquisition_date, 4)
-        setph(custodian_id, 5)
-        setph(description_id, 6)
+        itemId = data_table.item(selectedItem)['values']
+        # Update entry fields with selected item's data
+        setph(itemId[0], 0)  # Serial Number
+        setph(itemId[1], 1)  # Property ID
+        setph(itemId[2], 2)  # Room ID
+        setph(itemId[3], 3)  # Item Specification
+        setph(itemId[4], 4)  # Acquisition Date
+        setph(itemId[5], 5)  # Custodian ID
+        setph(itemId[6], 6)  # Description ID
     except IndexError:
         messagebox.showwarning("", "Please select a data row")
+
 
 # Finds an item based on one of the user's entry
 def find():
@@ -266,7 +267,7 @@ def find():
 
 # Clears the entry form
 def clear():
-    for num in range(0, 5):
+    for num in range(0, 7):  # Update the range to cover all entries including custodian and description ID
         setph('', num)
 
 # Exports the database to an excel file
